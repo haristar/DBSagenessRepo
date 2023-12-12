@@ -47,6 +47,7 @@ public class UpdateActivity extends AppCompatActivity {
                 author = author_input.getText().toString().trim();
                 pages = pages_input.getText().toString().trim();
                 myDB.updateData(id, title, author, pages);
+                finish();
 
             }
         });

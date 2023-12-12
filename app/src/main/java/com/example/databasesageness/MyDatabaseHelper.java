@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 class MyDatabaseHelper extends SQLiteOpenHelper {
 
@@ -47,16 +48,44 @@ class MyDatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
 
+        //String query = "SELECT " + COLUMN_TITLE + " FROM " + TABLE_NAME +
+                        //" WHERE EXISTS (SELECT " + COLUMN_TITLE + " FROM " +  TABLE_NAME  + " WHERE " + COLUMN_TITLE + " = '" + title + "';";
+        //String query = ""
         cv.put(COLUMN_TITLE,title);
         cv.put(COLUMN_AUTHOR,author);
         cv.put(COLUMN_PAGES,pages);
+        Cursor cursor = db.query(TABLE_NAME, new String[]{COLUMN_TITLE},
+                COLUMN_TITLE + "=?", new String[]{title}, null, null, null);
 
-        long result = db.insert(TABLE_NAME,null,cv);
+        if (cursor != null && cursor.getCount() > 0) {
+            // Duplicate entry found, handle the error as needed
+            Toast.makeText(context, "Already exists!", Toast.LENGTH_SHORT).show();
+
+        }else {
+            // No duplicate found, proceed with the insertion
+            try {
+                long result = db.insertOrThrow(TABLE_NAME, null, cv);
+                if(result == -1){
+                    Toast.makeText(context, "Failed?", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(context, "Added Successfully!", Toast.LENGTH_SHORT).show();
+                }
+            } catch (Exception e) {
+                // Insertion failed (likely due to a duplicate)
+                // Handle the error as needed
+                db.close();
+            }
+        }
+        /*cv.put(COLUMN_TITLE,title);
+        cv.put(COLUMN_AUTHOR,author);
+        cv.put(COLUMN_PAGES,pages);
+
+        /*long result = db.insert(TABLE_NAME,null,cv);
         if(result == -1){
             Toast.makeText(context, "Failed?", Toast.LENGTH_SHORT).show();
         }else{
             Toast.makeText(context, "Added Successfully!", Toast.LENGTH_SHORT).show();
-        }
+        }*/
     }
 
     Cursor readAllData(){
